@@ -63,6 +63,8 @@ ShellRoot {
     property bool trayMenuOpen: false
     property var trayMenuHandle: null
     property var trayMenuStack: []
+    property bool closePending: false  // focus moved away: popups will close after a few seconds
+    property bool popupHovered: false  // pointer is over a popup (holds the countdown)
     property real popupX: 0            // where the clicked trigger is, so the popup centres under it
     property string popupScreen: ""
     readonly property bool anyPopup: mediaOpen || btOpen || trayMenuOpen
@@ -71,6 +73,8 @@ ShellRoot {
         mediaOpen = false;
         btOpen = false;
         trayMenuOpen = false;
+        closePending = false;
+        popupHovered = false;
     }
     function openPopup(kind, screenName, x) {
         const same = (kind === "media" && mediaOpen) || (kind === "bt" && btOpen);
@@ -92,18 +96,32 @@ ShellRoot {
         trayMenuOpen = true;
     }
 
-    // X11 has no reliable "click outside" grab for popups, so they close when you switch workspace
-    // (or click the same trigger again).
+    // X11 has no reliable "click outside" grab for popups. Instead: when focus moves to another window (or you
+    // switch workspace), a 5 second countdown starts and the popup closes — unless the pointer is on it, which
+    // holds the countdown (it starts over once you leave). Clicking the same trigger again also closes it.
     Timer { id: popupAge; interval: 350 }            // grace period right after opening
+    Timer {
+        id: closeTimer
+        interval: 5000
+        running: root.closePending && root.anyPopup && !root.popupHovered
+        onTriggered: root.closeAllPopups()
+    }
 
-    // ONE cava runs for as long as a song plays and feeds both the popup bars and the little bar equalizer,
-    // so opening the popup finds the bars already moving (nothing has to start up) and both stay in sync.
+    // Two cava feeds:
+    //   light (10 bars @15fps) — drives the little bar equalizer, runs while a song plays
+    //   full  (20 bars @25fps) — drives the popup bars; runs ONLY while the popup is open and dies the moment it closes
+    readonly property bool fullWanted: playing && mediaOpen
+    onFullWantedChanged: {
+        cavaFlat = 0;
+        cavaProc.running = fullWanted;
+        if (!fullWanted) { cavaActive = false; cavaBars = []; }
+    }
     onMediaOpenChanged: artDebounce.restart()
     onPlayingChanged: {
-        cavaProc.running = playing;
-        if (!playing) { cavaActive = false; cavaBars = []; miniBars = []; cavaFlat = 0; }
+        miniProc.running = playing;
+        if (!playing) { miniBars = []; cavaProc.running = false; cavaActive = false; cavaBars = []; cavaFlat = 0; }
     }
-    Component.onCompleted: if (playing) cavaProc.running = true
+    Component.onCompleted: if (playing) miniProc.running = true
 
     // ───────────── audio output / battery / clock ─────────────
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
@@ -182,9 +200,10 @@ ShellRoot {
                 winTitle = e.container.name || "";
             else if (e.change === "close")
                 winTitle = "";
+            if (e.change === "focus" && anyPopup && !popupAge.running) closePending = true;
         } else if (e.current && e.change === "focus") {              // a workspace switch
             winTitle = "";                                           // the window::focus event that follows refills it
-            if (!popupAge.running) closeAllPopups();
+            if (anyPopup && !popupAge.running) closePending = true;
         }
     }
     Process {
@@ -344,8 +363,7 @@ ShellRoot {
     }
 
     // ───────────── cava (Firefox's audio only, via firefox-cava.sh) ─────────────
-    property int frame: 0
-    function parseCava(line) {
+    function parseCava(line) {                 // full feed (popup)
         const v = line.split(";").filter(x => x.length > 0).map(Number);
         let peak = 0;
         for (let i = 0; i < v.length; i++) peak = Math.max(peak, v[i]);
@@ -357,8 +375,10 @@ ShellRoot {
             cavaActive = true;
         }
         cavaBars = v;
-        frame = (frame + 1) % 1000;
-        if (mediaOpen || (frame & 1) === 0) miniBars = v;          // bar redraws at half rate when nobody's looking at the popup
+    }
+    function parseMini(line) {                 // light feed (bar equalizer)
+        const v = line.split(";").filter(x => x.length > 0).map(Number);
+        if (v.length > 0) miniBars = v;
     }
     // 5 chunky levels (0..1) for the little equalizer, averaged from however many bars cava sends
     function miniLevel(i) {
@@ -372,15 +392,25 @@ ShellRoot {
         return cnt > 0 ? sum / cnt / 100 : 0;
     }
 
-    // the single visualizer feed (20 bars @25fps), only while a song plays
+    // full feed (popup bars) — see fullWanted above
     Process {
         id: cavaProc
         running: false
-        command: ["bash", Quickshell.shellPath("firefox-cava.sh"), Quickshell.shellPath("cava.conf"), "viz"]
+        command: ["bash", Quickshell.shellPath("firefox-cava.sh"), Quickshell.shellPath("cava.conf"), "popup"]
         stdout: SplitParser { onRead: data => root.parseCava(data) }
-        onExited: if (root.playing) cavaRetry.start()
+        onExited: if (root.fullWanted) cavaRetry.start()
     }
-    Timer { id: cavaRetry; interval: 3000; onTriggered: if (root.playing) cavaProc.running = true }
+    Timer { id: cavaRetry; interval: 3000; onTriggered: if (root.fullWanted) cavaProc.running = true }
+
+    // light feed (bar equalizer) — runs while a song plays
+    Process {
+        id: miniProc
+        running: false
+        command: ["bash", Quickshell.shellPath("firefox-cava.sh"), Quickshell.shellPath("cava-bar.conf"), "bar"]
+        stdout: SplitParser { onRead: data => root.parseMini(data) }
+        onExited: if (root.playing) miniRetry.start()
+    }
+    Timer { id: miniRetry; interval: 3000; onTriggered: if (root.playing) miniProc.running = true }
 
     // ═════════════════════════════ the bar ═════════════════════════════
     Variants {
@@ -822,6 +852,7 @@ ShellRoot {
                         color: Qt.alpha(root.bgBase, 0.95)
                         border.width: 1
                         border.color: Qt.alpha(root.slate, 0.8)
+                        HoverHandler { onHoveredChanged: root.popupHovered = hovered }
 
                         // ── visualizer: rises from the bottom, BEHIND everything ──
                         ClippingRectangle {
@@ -1105,6 +1136,7 @@ ShellRoot {
                         color: Qt.alpha(root.bgBase, 0.96)
                         border.width: 1
                         border.color: Qt.alpha(root.slate, 0.8)
+                        HoverHandler { onHoveredChanged: root.popupHovered = hovered }
                         visible: menuOpener.children.values.length > 0
 
                         Column {
@@ -1253,6 +1285,7 @@ ShellRoot {
                         color: Qt.alpha(root.bgBase, 0.96)
                         border.width: 1
                         border.color: Qt.alpha(root.slate, 0.8)
+                        HoverHandler { onHoveredChanged: root.popupHovered = hovered }
 
                         Column {
                             id: btCol
