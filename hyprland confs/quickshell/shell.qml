@@ -8,6 +8,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import Quickshell.Bluetooth
 import Quickshell.Hyprland
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
@@ -80,6 +81,42 @@ ShellRoot {
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
     // ───────────── helpers ─────────────
+    // ───────────── bluetooth ─────────────
+    readonly property var btAdapter: Bluetooth.defaultAdapter
+    readonly property bool btAvailable: btAdapter ? true : false
+    readonly property bool btOn: btAdapter ? btAdapter.enabled : false
+
+    function btConnectedCount() {
+        if (!btAdapter) return 0;
+        const list = btAdapter.devices.values;
+        let n = 0;
+        for (let i = 0; i < list.length; i++) if (list[i].connected) n++;
+        return n;
+    }
+    function btPairedCount() {
+        if (!btAdapter) return 0;
+        const list = btAdapter.devices.values;
+        let n = 0;
+        for (let i = 0; i < list.length; i++) if (list[i].paired) n++;
+        return n;
+    }
+    // battery % of the first connected device that reports one ("" if none)
+    function btHeadline() {
+        if (!btAdapter) return "";
+        const list = btAdapter.devices.values;
+        for (let i = 0; i < list.length; i++) {
+            const d = list[i];
+            if (d.connected && d.batteryAvailable) return Math.round(d.battery * 100) + "%";
+        }
+        return "";
+    }
+    function btStatus(d) {
+        if (d.state === 3) return "Connecting…";
+        if (d.state === 2) return "Disconnecting…";
+        if (d.connected) return d.batteryAvailable ? "Connected · " + Math.round(d.battery * 100) + "%" : "Connected";
+        return "Not connected";
+    }
+
     function workspaceExists(id) {
         const list = Hyprland.workspaces.values;
         for (let i = 0; i < list.length; i++)
@@ -253,8 +290,11 @@ ShellRoot {
             property var trayMenuStack: []
             property real trayMenuX: 0
             property bool trayMenuOpen: false
+            property bool btOpen: false          // bluetooth popup
+            property real btX: 0
 
             function openTrayMenu(item, x) {
+                btOpen = false;
                 trayMenuStack = [];
                 trayMenuHandle = item.menu;
                 trayMenuX = x;
@@ -493,7 +533,10 @@ ShellRoot {
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         onClicked: mouse => {
                             if (mouse.button === Qt.RightButton) root.showDate = !root.showDate;
-                            else root.mediaOpen = !root.mediaOpen;
+                            else {
+                                bar.btOpen = false;
+                                root.mediaOpen = !root.mediaOpen;
+                            }
                         }
                     }
                 }
@@ -542,6 +585,36 @@ ShellRoot {
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: Quickshell.execDetached(["nm-connection-editor"])
+                        }
+                    }
+
+                    // bluetooth (icon in the bar, click = device list, right-click = settings)
+                    Text {
+                        id: btIcon
+                        visible: root.btAvailable
+                        text: "\uf294" + (root.btHeadline() !== "" ? "  " + root.btHeadline() : "")
+                        font.family: root.fontFamily
+                        font.pixelSize: root.fontSize
+                        color: btMouse.containsMouse ? root.horizon
+                               : (!root.btOn ? root.fgDim : (root.btConnectedCount() > 0 ? root.horizon : root.fgMuted))
+                        Behavior on color { ColorAnimation { duration: 150 } }
+
+                        MouseArea {
+                            id: btMouse
+                            anchors.fill: parent
+                            anchors.margins: -4
+                            hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            onClicked: mouse => {
+                                if (mouse.button === Qt.RightButton) {
+                                    Quickshell.execDetached(["blueman-manager"]);
+                                } else {
+                                    bar.btX = btIcon.mapToItem(null, btIcon.width / 2, 0).x;
+                                    root.mediaOpen = false;
+                                    bar.trayMenuOpen = false;
+                                    bar.btOpen = !bar.btOpen;
+                                }
+                            }
                         }
                     }
 
@@ -1122,6 +1195,230 @@ ShellRoot {
                                                 bar.trayMenuOpen = false;
                                             }
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ───────────── bluetooth popup (device list) ─────────────
+            LazyLoader {
+                active: bar.btOpen
+
+                PopupWindow {
+                    id: btPopup
+                    anchor.window: bar
+                    anchor.rect.x: Math.max(4, Math.min(bar.width - width - 4, bar.btX - width / 2))
+                    anchor.rect.y: bar.height + 8 - 14
+                    implicitWidth: 304                       // 260 card + 2*22 shadow room
+                    implicitHeight: btCard.height + 44       // 14 top + 30 bottom
+                    visible: bar.btOpen
+                    color: "transparent"
+
+                    HyprlandFocusGrab {
+                        windows: [btPopup, bar]
+                        active: bar.btOpen
+                        onCleared: bar.btOpen = false
+                    }
+
+                    Rectangle {
+                        id: btCard
+                        x: 22; y: 14
+                        width: 260
+                        height: btCol.implicitHeight + 20
+                        radius: 12
+                        color: Qt.alpha(root.bgBase, 0.96)
+                        border.width: 1
+                        border.color: Qt.alpha(root.slate, 0.8)
+                        opacity: 0
+                        Component.onCompleted: opacity = 1
+                        Behavior on opacity { NumberAnimation { duration: 120 } }
+
+                        // soft shadow
+                        Item {
+                            z: -1
+                            anchors.fill: parent
+                            Repeater {
+                                model: 8
+                                delegate: Rectangle {
+                                    required property int index
+                                    readonly property real spread: (index + 1) * 2.4
+                                    x: -spread
+                                    y: -spread + 5
+                                    width: parent.width + spread * 2
+                                    height: parent.height + spread * 2
+                                    radius: btCard.radius + spread
+                                    color: Qt.rgba(0, 0, 0, 0.035)
+                                }
+                            }
+                        }
+
+                        Column {
+                            id: btCol
+                            x: 10; y: 10
+                            width: parent.width - 20
+                            spacing: 4
+
+                            // header: title + power switch
+                            Item {
+                                width: btCol.width
+                                height: 30
+
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 6
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "\uf294   Bluetooth"
+                                    font.family: root.fontFamily
+                                    font.pixelSize: 13
+                                    font.weight: Font.DemiBold
+                                    color: root.fgPrimary
+                                }
+
+                                Rectangle {
+                                    id: btSwitch
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 4
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 38; height: 20
+                                    radius: 10
+                                    color: root.btOn ? Qt.alpha(root.horizon, 0.35) : Qt.alpha(root.slateHi, 0.5)
+                                    Behavior on color { ColorAnimation { duration: 150 } }
+
+                                    Rectangle {
+                                        y: 3
+                                        width: 14; height: 14
+                                        radius: 7
+                                        x: root.btOn ? btSwitch.width - width - 3 : 3
+                                        color: root.btOn ? root.horizon : root.fgDim
+                                        Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: if (root.btAdapter) root.btAdapter.enabled = !root.btAdapter.enabled
+                                    }
+                                }
+                            }
+
+                            Rectangle { width: btCol.width; height: 1; color: Qt.alpha(root.slateHi, 0.5) }
+
+                            Text {
+                                visible: !root.btOn
+                                x: 6
+                                text: "Bluetooth is turned off"
+                                font.family: root.fontFamily
+                                font.pixelSize: 11
+                                color: root.fgDim
+                                height: visible ? 28 : 0
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            Text {
+                                visible: root.btOn && root.btPairedCount() === 0
+                                x: 6
+                                text: "No paired devices"
+                                font.family: root.fontFamily
+                                font.pixelSize: 11
+                                color: root.fgDim
+                                height: visible ? 28 : 0
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
+                            // paired devices: click = connect / disconnect
+                            Repeater {
+                                model: root.btAdapter ? root.btAdapter.devices : null
+
+                                delegate: Item {
+                                    id: dev
+                                    required property var modelData
+                                    readonly property bool shown: root.btOn && modelData.paired
+                                    readonly property bool linked: modelData.connected
+                                    width: btCol.width
+                                    height: shown ? 46 : 0
+                                    visible: shown
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: 8
+                                        color: devMouse.containsMouse ? Qt.alpha(root.slateHi, 0.3) : "transparent"
+                                    }
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 8
+                                        anchors.rightMargin: 8
+                                        spacing: 10
+
+                                        Image {
+                                            Layout.preferredWidth: 22
+                                            Layout.preferredHeight: 22
+                                            source: Quickshell.iconPath(dev.modelData.icon || "bluetooth")
+                                            sourceSize.width: 44
+                                            sourceSize.height: 44
+                                            opacity: dev.linked ? 1 : 0.55
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 1
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: dev.modelData.name || dev.modelData.deviceName || dev.modelData.address
+                                                elide: Text.ElideRight
+                                                font.family: root.fontFamily
+                                                font.pixelSize: 12
+                                                color: dev.linked ? root.fgPrimary : root.fgMuted
+                                            }
+                                            Text {
+                                                text: root.btStatus(dev.modelData)
+                                                font.family: root.fontFamily
+                                                font.pixelSize: 10
+                                                color: dev.linked ? root.horizon : root.fgDim
+                                            }
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: devMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: dev.modelData.connected = !dev.modelData.connected
+                                    }
+                                }
+                            }
+
+                            Rectangle { width: btCol.width; height: 1; color: Qt.alpha(root.slateHi, 0.5) }
+
+                            // footer: bluetooth settings (pairing new devices lives there)
+                            Item {
+                                width: btCol.width
+                                height: 30
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 8
+                                    color: settingsMouse.containsMouse ? Qt.alpha(root.slateHi, 0.3) : "transparent"
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: 8
+                                    text: "Bluetooth settings…"
+                                    font.family: root.fontFamily
+                                    font.pixelSize: 11
+                                    color: root.fgMuted
+                                }
+                                MouseArea {
+                                    id: settingsMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        Quickshell.execDetached(["blueman-manager"]);
+                                        bar.btOpen = false;
                                     }
                                 }
                             }
