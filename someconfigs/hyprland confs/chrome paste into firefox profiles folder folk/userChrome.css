@@ -1,0 +1,26 @@
+:root,
+:root:not([lwtheme]) {
+  --tabpanel-background-color: transparent !important;
+  --toolbar-bgcolor: transparent !important;
+  --toolbox-bgcolor: transparent !important;
+  --toolbar-non-lwt-bgcolor: transparent !important;
+  --lwt-accent-color: transparent !important;
+  --lwt-accent-color-inactive: transparent !important;
+  --urlbar-box-bgcolor: rgba(20, 20, 30, 0.45) !important;
+  --toolbar-field-background-color: rgba(20, 20, 30, 0.45) !important;
+  --tab-selected-bgcolor: rgba(255, 255, 255, 0.12) !important;
+}
+
+:root, body, #main-window, #browser, #appcontent,
+#navigator-toolbox, #nav-bar, #TabsToolbar, #titlebar,
+#toolbar-menubar, #PersonalToolbar, #sidebar-box, #sidebar-main,
+#tabbrowser-tabbox, #tabbrowser-tabpanels, .browserContainer,
+#tabbrowser-arrowscrollbox, #urlbar-background {
+  background: transparent !important;
+  background-color: transparent !important;
+  appearance: none !important;
+}
+
+#urlbar-background {
+  background-color: rgba(20, 20, 30, 0.45) !important;
+}

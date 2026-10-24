@@ -1,0 +1,86 @@
+@-moz-document domain(youtube.com) {
+  html, body, ytd-app {
+    background: transparent !important;
+  }
+  html[dark], [dark] {
+    --yt-spec-base-background: transparent !important;
+    --yt-spec-general-background-a: transparent !important;
+    --yt-spec-general-background-b: transparent !important;
+  }
+}
+
+@-moz-document domain(claude.ai) {
+  html, body, #root, main {
+    background: transparent !important;
+  }
+}
+
+@-moz-document domain(soundcloud.com) {
+  html, body, #app, .l-container, .l-content {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+  header.header, .header {
+    background: rgba(15, 15, 25, 0.35) !important;
+    background-color: rgba(15, 15, 25, 0.35) !important;
+  }
+}
+
+@-moz-document url(about:home), url(about:newtab), url(about:blank) {
+  :root {
+    --newtab-background-color: transparent !important;
+    --newtab-background-color-secondary: transparent !important;
+  }
+  html, body, #root, .outer-wrapper {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+  .top-site-outer,
+  .top-site-outer .top-site-button,
+  .top-site-outer .tile,
+  .top-site-outer .tile .icon-wrapper,
+  .top-site-outer:is(:hover, :focus, :focus-within, .active),
+  .top-site-outer:is(:hover, :focus, :focus-within, .active) .top-site-button,
+  .top-site-outer:is(:hover, :focus, :focus-within, .active) .tile,
+  .top-site-outer:is(:hover, :focus, :focus-within, .active) .tile .icon-wrapper {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+  }
+}
+
+@-moz-document domain(google.com) {
+  html, body, #main, #cnt, #rcnt, #center_col, #appbar, #searchform,
+  .L3eUgb, .o3j99, .sfbg, .minidiv, #gb {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  /* search bar wrappers stay clear */
+  .SDkEP, .a4bIc, form[role="search"] > div {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* only the pill gets the tint */
+  .RNNXgb {
+    background: rgba(20, 20, 30, 0.45) !important;
+    background-color: rgba(20, 20, 30, 0.45) !important;
+    border-radius: 24px !important;
+    box-shadow: none !important;
+  }
+  textarea.gLFyf, input.gLFyf {
+    background: transparent !important;
+  }
+
+  /* AI overview fade: swap THATCLASS for the real class from the inspector */
+  .THATCLASS,
+  .THATCLASS::before,
+  .THATCLASS::after {
+    background: none !important;
+    background-image: none !important;
+  }
+}

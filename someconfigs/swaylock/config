@@ -1,0 +1,59 @@
+# ~/.config/swaylock/config  (needs swaylock-effects)
+# Minimal look: big clock, no visible ring until you type
+# Palette from wallhaven-x63gdd.png
+
+image=/home/lowintel/Pictures/wallpapers/wallhaven-x63gdd.png
+scaling=fill
+color=0d0d17
+
+# effects
+effect-blur=7x3
+effect-vignette=0.5:0.7
+fade-in=0.2
+
+# clock (drawn by the indicator, so keep it visible but make its ring invisible)
+clock
+timestr=%H:%M
+datestr=%A, %d %B
+indicator-idle-visible
+indicator-radius=220
+indicator-thickness=4
+indicator-caps-lock
+show-failed-attempts
+ignore-empty-password
+
+font=JetBrainsMono Nerd Font
+font-size=80
+
+# no filled circle or ring while idle / typing
+inside-color=00000000
+inside-clear-color=00000000
+inside-ver-color=00000000
+inside-wrong-color=00000000
+inside-caps-lock-color=00000000
+
+ring-color=00000000
+ring-clear-color=00000000
+ring-ver-color=8a92c4
+ring-wrong-color=c47a8a
+ring-caps-lock-color=00000000
+
+line-color=00000000
+line-clear-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+line-caps-lock-color=00000000
+separator-color=00000000
+
+# thin arcs flash on each keypress (typing feedback)
+key-hl-color=b8c0e8
+bs-hl-color=c47a8a
+caps-lock-key-hl-color=c4b48a
+caps-lock-bs-hl-color=c47a8a
+
+# text
+text-color=b8c0e8
+text-clear-color=b8c0e8
+text-ver-color=8a92c4
+text-wrong-color=c47a8a
+text-caps-lock-color=c4b48a

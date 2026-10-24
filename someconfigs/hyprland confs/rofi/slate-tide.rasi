@@ -1,0 +1,174 @@
+/**
+ * Rofi theme — "Slate Tide"
+ * Inspired by a dusk seascape: slate-grey storm clouds, a cold
+ * lavender horizon band, distant mountain silhouettes, dark water.
+ *
+ * Built for Hyprland — use rofi-wayland (pacman -S rofi-wayland on
+ * CachyOS/Arch) so it renders as a proper layer-shell surface.
+ */
+
+configuration {
+    modi:                       "drun,run,window";
+    show-icons:                 true;
+    icon-theme:                 "Papirus";
+    display-drun:               "Apps";
+    display-run:                "Run";
+    display-window:             "Windows";
+    drun-display-format:        "{icon} {name}";
+    font:                       "JetBrainsMono Nerd Font 11";
+    disable-history:            false;
+    hover-select:               true;
+}
+
+* {
+    /* -- palette pulled from the image -- */
+    bg-storm:        #0a0a0fe6;   /* near-black cloud / foreground, translucent */
+    bg-main:         #15151fe6;   /* main window bg                            */
+    bg-horizon:      #2a2d3ecc;   /* mid slate-blue band                       */
+    bg-alt:          #1c1c28b3;   /* alternating row                           */
+
+    fg-mist:         #d6d9e6ff;   /* pale horizon-light text                   */
+    fg-dim:          #8b8fa3cc;   /* dimmer secondary text                     */
+    fg-silhouette:   #46495eff;   /* mountain-silhouette - borders/lines       */
+
+    accent-glow:     #8891b5ff;   /* muted lavender horizon glow (selection)   */
+    accent-soft:     #363a52ff;   /* softer accent for hover                   */
+    urgent:          #a56868ff;
+
+    background-color:           transparent;
+    text-color:                 @fg-mist;
+
+    border-color:                @fg-silhouette;
+    separatorcolor:               @fg-silhouette;
+    scrollbar-handle:            @accent-glow;
+
+    spacing:                     0;
+}
+
+window {
+    transparency:                "real";
+    background-color:            @bg-main;
+    border:                      1px;
+    border-radius:                14px;
+    border-color:                @fg-silhouette;
+    width:                       520px;
+    location:                    center;
+    anchor:                      center;
+    padding:                     0px;
+}
+
+mainbox {
+    background-color:            transparent;
+    children:                    [ "inputbar", "message", "listview" ];
+    spacing:                     10px;
+    padding:                     16px;
+}
+
+inputbar {
+    background-color:            @bg-storm;
+    text-color:                  @fg-mist;
+    border-radius:                10px;
+    border:                      1px;
+    border-color:                @fg-silhouette;
+    padding:                     10px 14px;
+    spacing:                     8px;
+    children:                    [ "prompt", "entry" ];
+}
+
+prompt {
+    background-color:            transparent;
+    text-color:                  @accent-glow;
+    font:                        "JetBrainsMono Nerd Font Bold 11";
+}
+
+entry {
+    background-color:            transparent;
+    text-color:                  @fg-mist;
+    placeholder:                 "Search...";
+    placeholder-color:           @fg-dim;
+    cursor:                      text;
+}
+
+message {
+    background-color:            transparent;
+    border:                      0px;
+    padding:                     0px 4px;
+}
+
+textbox {
+    background-color:            transparent;
+    text-color:                  @fg-dim;
+}
+
+listview {
+    background-color:            transparent;
+    columns:                     1;
+    lines:                       8;
+    spacing:                     4px;
+    cycle:                       true;
+    dynamic:                     true;
+    scrollbar:                   true;
+    fixed-height:                false;
+}
+
+scrollbar {
+    width:                       3px;
+    border-radius:                4px;
+    handle-color:                 @accent-glow;
+    handle-width:                 6px;
+    background-color:            @bg-alt;
+}
+
+element {
+    background-color:            transparent;
+    text-color:                  @fg-mist;
+    orientation:                  horizontal;
+    border-radius:                8px;
+    padding:                     8px 10px;
+    spacing:                     10px;
+    cursor:                      pointer;
+}
+
+element normal.normal {
+    background-color:            transparent;
+    text-color:                  @fg-mist;
+}
+
+element normal.urgent,
+element alternate.urgent {
+    background-color:            transparent;
+    text-color:                  @urgent;
+}
+
+element selected.normal,
+element selected.active {
+    background-color:            @accent-soft;
+    text-color:                  @fg-mist;
+    border:                      1px;
+    border-color:                @accent-glow;
+}
+
+element alternate.normal {
+    background-color:            @bg-alt;
+    text-color:                  @fg-mist;
+}
+
+element-icon {
+    size:                        22px;
+    vertical-align:               0.5;
+    horizontal-align:             0.5;
+}
+
+element-text {
+    vertical-align:               0.5;
+    text-color:                   inherit;
+}
+
+error-message {
+    background-color:            @bg-main;
+    text-color:                  @fg-mist;
+    border:                      1px;
+    border-color:                @urgent;
+    border-radius:                10px;
+    padding:                     12px;
+}
