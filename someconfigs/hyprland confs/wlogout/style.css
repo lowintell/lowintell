@@ -1,0 +1,76 @@
+/* ~/.config/wlogout/style.css
+   Palette from wallhaven-x63gdd.png */
+
+@define-color base     #0d0d17;
+@define-color surface  #141528;
+@define-color overlay  #2d2f4a;
+@define-color muted    #565b8a;
+@define-color accent   #8a92c4;
+@define-color text     #b8c0e8;
+@define-color fail     #c47a8a;
+
+* {
+    background-image: none;
+    box-shadow: none;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 16px;
+}
+
+window {
+    background-color: rgba(13, 13, 23, 0.88);
+}
+
+button {
+    color: @text;
+    background-color: @surface;
+    border: 2px solid @overlay;
+    border-radius: 18px;
+    margin: 14px;
+    background-repeat: no-repeat;
+    background-position: center 40%;
+    background-size: 25%;
+    text-shadow: none;
+    transition: all 200ms ease;
+}
+
+button:focus,
+button:hover {
+    background-color: @overlay;
+    border-color: @accent;
+    color: @text;
+    outline-style: none;
+}
+
+button:active {
+    background-color: @muted;
+    border-color: @text;
+}
+
+#shutdown:hover,
+#shutdown:focus {
+    border-color: @fail;
+}
+
+#lock {
+    background-image: image(url("/usr/share/wlogout/icons/lock.png"));
+}
+
+#logout {
+    background-image: image(url("/usr/share/wlogout/icons/logout.png"));
+}
+
+#suspend {
+    background-image: image(url("/usr/share/wlogout/icons/suspend.png"));
+}
+
+#hibernate {
+    background-image: image(url("/usr/share/wlogout/icons/hibernate.png"));
+}
+
+#reboot {
+    background-image: image(url("/usr/share/wlogout/icons/reboot.png"));
+}
+
+#shutdown {
+    background-image: image(url("/usr/share/wlogout/icons/shutdown.png"));
+}

@@ -1,0 +1,87 @@
+# btop theme: dusk-shore
+# Palette sampled from a muted slate-violet dusk: dark clouds, hazy mountains, calm sea.
+# Transparent background: main_bg is empty. Also set  theme_background = False  in btop.conf
+
+# Main background, empty for terminal default (transparent)
+theme[main_bg]=""
+
+# Main text color
+theme[main_fg]="#9298bd"
+
+# Title color for boxes
+theme[title]="#aeb4d4"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#8489ae"
+
+# Background color of selected item in processes box
+theme[selected_bg]="#474a73"
+
+# Foreground color of selected item in processes box
+theme[selected_fg]="#e4e6f2"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#2d304d"
+
+# Color of text appearing on top of graphs, i.e. network speed
+theme[graph_text]="#9298bd"
+
+# Misc colors for processes box (tree lines, sleeping/running icons etc.)
+theme[proc_misc]="#6e769c"
+
+# Cpu, Memory, Network, Proc box outline colors
+theme[cpu_box]="#51577e"
+theme[mem_box]="#474a73"
+theme[net_box]="#6e769c"
+theme[proc_box]="#474a73"
+
+# Box divider line and small boxes line color
+theme[div_line]="#2d304d"
+
+# Temperature graph colors (cool -> hot)
+theme[temp_start]="#474a73"
+theme[temp_mid]="#757ba2"
+theme[temp_end]="#aeb4d4"
+
+# CPU graph colors
+theme[cpu_start]="#474a73"
+theme[cpu_mid]="#6e769c"
+theme[cpu_end]="#aeb4d4"
+
+# Mem/Disk free meter
+theme[free_start]="#2d304d"
+theme[free_mid]="#474a73"
+theme[free_end]="#51577e"
+
+# Mem/Disk cached meter
+theme[cached_start]="#474a73"
+theme[cached_mid]="#6e769c"
+theme[cached_end]="#9298bd"
+
+# Mem/Disk available meter
+theme[available_start]="#51577e"
+theme[available_mid]="#757ba2"
+theme[available_end]="#aeb4d4"
+
+# Mem/Disk used meter
+theme[used_start]="#6e769c"
+theme[used_mid]="#9298bd"
+theme[used_end]="#e4e6f2"
+
+# Download graph colors
+theme[download_start]="#474a73"
+theme[download_mid]="#6e769c"
+theme[download_end]="#aeb4d4"
+
+# Upload graph colors
+theme[upload_start]="#51577e"
+theme[upload_mid]="#8489ae"
+theme[upload_end]="#e4e6f2"
+
+# Process box color gradient for threads, mem and cpu usage
+theme[process_start]="#474a73"
+theme[process_mid]="#757ba2"
+theme[process_end]="#e4e6f2"
+
+# Meter background (empty portion of bars)
+theme[meter_bg]="#2d304d"
