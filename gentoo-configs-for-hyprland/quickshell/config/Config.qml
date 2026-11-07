@@ -10,7 +10,8 @@ Singleton {
     property real weatherLon: 35.5018
     property bool useFahrenheit: false
     // Open-Meteo model. "" = automatic mix. Try: ecmwf_ifs025, icon_global, gfs_seamless, meteofrance_seamless
-property string weatherModel: "ecmwf_ifs025"
+    property string weatherModel: ""
+
     // Clock
     property string timeFormat: "HH:mm"
     property string dateFormat: "ddd d MMM"
@@ -27,6 +28,17 @@ property string weatherModel: "ecmwf_ifs025"
     // GPU polling (nvidia-smi / amdgpu sysfs). Only runs while the System panel is open,
     // because querying nvidia-smi can wake a hybrid-graphics dGPU.
     property bool gpuPolling: true
+
+
+    // tuned profiles shown in quick settings (name = tuned profile, shown only if it exists).
+    // Laptop-friendly extras you can add: "balanced-battery", "laptop-battery-powersave", "latency-performance".
+    property var tunedProfiles: [
+        { name: "powersave", label: "Saver", icon: "eco" },
+        { name: "balanced", label: "Balanced", icon: "balance" },
+        { name: "throughput-performance", label: "Performance", icon: "bolt" }
+    ]
+    // If `tuned-adm profile` needs root on your system, set this to ["sudo", "-n"] (with a NOPASSWD rule) or ["doas", "-n"].
+    property var tunedElevate: ["sudo", "-n"]
 
     property int nightLightTemp: 4200
     property string terminal: "kitty"

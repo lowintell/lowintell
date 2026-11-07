@@ -21,13 +21,37 @@ PanelPopup {
     // bluetooth helpers
     readonly property var adapter: Bluetooth.defaultAdapter
     readonly property bool btOn: adapter !== null && adapter.enabled
+    function btPct(dev) {
+        const b = dev.battery;
+        return Math.round(b <= 1 ? b * 100 : b);
+    }
+    function btIcon(dev) {
+        const i = (dev.icon || "").toLowerCase();
+        if (i.indexOf("headset") >= 0 || i.indexOf("headphone") >= 0) return "headphones";
+        if (i.indexOf("mouse") >= 0) return "mouse";
+        if (i.indexOf("keyboard") >= 0) return "keyboard";
+        if (i.indexOf("phone") >= 0) return "smartphone";
+        if (i.indexOf("gaming") >= 0 || i.indexOf("joystick") >= 0) return "sports_esports";
+        if (i.indexOf("audio") >= 0 || i.indexOf("speaker") >= 0) return "speaker";
+        return "bluetooth_connected";
+    }
+    readonly property var btConnected: {
+        if (!adapter || !adapter.enabled) return [];
+        const list = Bluetooth.devices.values, out = [];
+        for (let i = 0; i < list.length; i++) if (list[i].connected) out.push(list[i]);
+        return out;
+    }
     readonly property string btSubtitle: {
         if (!adapter) return "Unavailable";
         if (!adapter.enabled) return "Off";
-        const list = Bluetooth.devices.values;
-        const names = [];
-        for (let i = 0; i < list.length; i++) if (list[i].connected) names.push(list[i].name);
-        return names.length > 0 ? names.join(", ") : "On";
+        if (btConnected.length === 0) return "On";
+        return btConnected.map(d => d.name + (d.batteryAvailable ? " · " + btPct(d) + "%" : "")).join(", ");
+    }
+
+    // tuned profiles that actually exist on this machine
+    readonly property var profileModel: {
+        const have = TunedService.available;
+        return Config.tunedProfiles.filter(p => have.indexOf(p.name) >= 0);
     }
 
     // battery helpers
@@ -202,6 +226,75 @@ PanelPopup {
             }
         }
 
+        // connected bluetooth devices with battery level
+        Rectangle {
+            Layout.fillWidth: true
+            visible: win.btConnected.length > 0
+            implicitHeight: btCol.implicitHeight + 24
+            radius: Theme.radiusSm + 2
+            color: Theme.tile
+            border.width: 1
+            border.color: Theme.hairline
+
+            ColumnLayout {
+                id: btCol
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }
+                spacing: 10
+
+                Repeater {
+                    model: win.btConnected
+                    delegate: RowLayout {
+                        id: dev
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Icon { name: win.btIcon(dev.modelData); size: 19; color: Theme.accent }
+                        Text {
+                            Layout.fillWidth: true
+                            text: dev.modelData.name
+                            color: Theme.text
+                            font.family: Theme.fontSans
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                        }
+                        RowLayout {
+                            visible: dev.modelData.batteryAvailable
+                            spacing: 8
+                            Rectangle {
+                                Layout.preferredWidth: 44
+                                Layout.preferredHeight: 6
+                                radius: 3
+                                color: Qt.rgba(1, 1, 1, 0.09)
+                                Rectangle {
+                                    width: parent.width * Math.min(1, win.btPct(dev.modelData) / 100)
+                                    height: parent.height
+                                    radius: 3
+                                    color: win.btPct(dev.modelData) <= 20 ? Theme.bad : Theme.accent
+                                    Behavior on width { NumberAnimation { duration: Theme.animSlow; easing.type: Easing.OutCubic } }
+                                }
+                            }
+                            Text {
+                                Layout.preferredWidth: 34
+                                horizontalAlignment: Text.AlignRight
+                                text: win.btPct(dev.modelData) + "%"
+                                color: win.btPct(dev.modelData) <= 20 ? Theme.bad : Theme.textDim
+                                font.family: Theme.fontMono
+                                font.pixelSize: 12
+                            }
+                        }
+                        Text {
+                            visible: !dev.modelData.batteryAvailable
+                            text: "no battery info"
+                            color: Theme.textMute
+                            font.family: Theme.fontSans
+                            font.pixelSize: 11
+                        }
+                    }
+                }
+            }
+        }
+
         // wi-fi networks (right-click the Wi-Fi tile, or use the chevron)
         Rectangle {
             Layout.fillWidth: true
@@ -293,24 +386,18 @@ PanelPopup {
             }
         }
 
-        // power profiles
+        // power profiles (tuned)
         RowLayout {
             Layout.fillWidth: true
+            visible: profileModel.length > 0
             spacing: 6
 
             Repeater {
-                model: {
-                    const m = [
-                        { key: PowerProfile.PowerSaver, label: "Saver", icon: "eco" },
-                        { key: PowerProfile.Balanced, label: "Balanced", icon: "balance" }
-                    ];
-                    if (PowerProfiles.hasPerformanceProfile) m.push({ key: PowerProfile.Performance, label: "Performance", icon: "bolt" });
-                    return m;
-                }
+                model: win.profileModel
                 delegate: Rectangle {
                     id: prof
                     required property var modelData
-                    readonly property bool on: PowerProfiles.profile === modelData.key
+                    readonly property bool on: TunedService.active === modelData.name
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
                     Layout.preferredHeight: 40
@@ -335,10 +422,19 @@ PanelPopup {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: PowerProfiles.profile = prof.modelData.key
+                        onClicked: TunedService.set(prof.modelData.name)
                     }
                 }
             }
+        }
+        Text {
+            visible: TunedService.failed
+            Layout.fillWidth: true
+            text: "Couldn't switch profile (tuned-adm needs permission). See tunedElevate in Config.qml."
+            color: Theme.bad
+            font.family: Theme.fontSans
+            font.pixelSize: 11
+            wrapMode: Text.WordWrap
         }
 
         // battery

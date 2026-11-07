@@ -19,6 +19,5 @@ ShellRoot {
     SystemMonitor {}
     QuickSettings {}
     NotificationCenter {}
-    AppLauncher {}
     NotificationPopups {}
 }

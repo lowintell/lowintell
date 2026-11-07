@@ -37,6 +37,14 @@ PanelWindow {
     SystemClock { id: clock; precision: SystemClock.Minutes }
     TrayMenu { id: trayMenu; bar: bar }
 
+    // always show at least Config.workspaceCount dots, and grow to include the highest workspace in use
+    readonly property int wsCount: {
+        let m = Config.workspaceCount;
+        const v = Hyprland.workspaces.values;
+        for (let i = 0; i < v.length; i++) if (v[i].id > m) m = v[i].id;
+        return m;
+    }
+
     readonly property var bat: UPower.displayDevice
     readonly property bool hasBat: bat !== null && bat.isLaptopBattery
     readonly property real batPct: hasBat ? bat.percentage : 0
@@ -68,11 +76,7 @@ PanelWindow {
             anchors.centerIn: parent
             spacing: 10
 
-            BarButton {
-                active: UiState.active === "launcher"
-                onClicked: UiState.toggle("launcher")
-                Icon { name: "apps"; size: 18; color: Theme.accent }
-            }
+            GentooLogo { Layout.preferredWidth: 22; Layout.preferredHeight: 22; Layout.leftMargin: 4 }
 
             // workspaces
             Item {
@@ -83,7 +87,7 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 7
                     Repeater {
-                        model: Config.workspaceCount
+                        model: bar.wsCount
                         delegate: Rectangle {
                             id: dot
                             required property int index
