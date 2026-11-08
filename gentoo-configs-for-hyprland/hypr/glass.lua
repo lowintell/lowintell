@@ -22,3 +22,15 @@ hl.layer_rule({
 	match = { namespace = "^qsscrim$" },
 	no_anim = true,
 })
+
+local ok, c = pcall(require, "qs-colors")
+if ok and type(c) == "table" then
+	hl.config({
+		general = {
+			col = {
+				active_border = { colors = { c.active1, c.active2 }, angle = 45 },
+				inactive_border = c.inactive,
+			},
+		},
+	})
+end

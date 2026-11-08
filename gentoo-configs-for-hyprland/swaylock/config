@@ -1,0 +1,56 @@
+# swaylock — "Slate Tide"
+# Goes in ~/.config/swaylock/config   (colors are rrggbb or rrggbbaa, no '#')
+
+# --- behaviour ---
+ignore-empty-password
+show-failed-attempts
+daemonize
+
+# --- background ---
+# Solid dusk navy by default. To use a wallpaper instead, uncomment BOTH lines and set the real file name:
+color=11121f
+image=/home/lowintel/Pictures/wallpapers/wallhaven-x63gdd.png
+scaling=fill
+
+# --- text ---
+font=JetBrainsMono Nerd Font
+font-size=22
+
+# --- the ring (only shows while you type / verify, not when idle) ---
+indicator-radius=78
+indicator-thickness=7
+
+# inside of the ring: translucent navy in every state
+inside-color=11121fd9
+inside-clear-color=11121fd9
+inside-caps-lock-color=11121fd9
+inside-ver-color=11121fd9
+inside-wrong-color=11121fd9
+
+# the ring itself: slate when idle/typing, pale blue while checking, red when wrong, amber with caps lock
+ring-color=2d3050
+ring-clear-color=7d85b5
+ring-caps-lock-color=d1a56b
+ring-ver-color=b4bde8
+ring-wrong-color=e0645c
+
+# hide the thin line between the inside and the ring
+line-color=00000000
+line-clear-color=00000000
+line-caps-lock-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+
+# the little segments that light up as you type (pale blue), backspace in red, caps lock in amber
+key-hl-color=b4bde8
+caps-lock-key-hl-color=d1a56b
+bs-hl-color=e0645c
+caps-lock-bs-hl-color=e0645c
+separator-color=00000000
+
+# text inside the ring
+text-color=d5daf2
+text-clear-color=8a90b8
+text-caps-lock-color=d1a56b
+text-ver-color=b4bde8
+text-wrong-color=e0645c

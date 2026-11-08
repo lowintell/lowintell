@@ -92,6 +92,10 @@ PanelPopup {
             }
             Item { Layout.fillWidth: true }
             IconButton {
+                size: 32; iconSize: 17; icon: "settings"
+                onClicked: UiState.open("settings")
+            }
+            IconButton {
                 size: 32; iconSize: 17; icon: "lock"
                 onClicked: { UiState.close(); Quickshell.execDetached(Config.lockCommand); }
             }

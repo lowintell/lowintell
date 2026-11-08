@@ -15,7 +15,7 @@ Singleton {
     Process {
         id: cava
         command: Config.cavaCommand
-        running: MediaService.isPlaying
+        running: MediaService.isPlaying && Settings.visualizerEnabled
         stdout: SplitParser {
             onRead: data => {
                 const parts = data.split(";");

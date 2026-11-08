@@ -32,6 +32,19 @@ PanelWindow {
         Region { item: leftIsland }
         Region { item: centerIsland }
         Region { item: rightIsland }
+        Region { item: fullMask }
+    }
+
+    // "full width" bar style: one strip behind everything; islands then draw no background
+    readonly property bool fullStyle: Settings.barStyle === "full"
+    Item { id: fullMask; width: bar.fullStyle ? parent.width : 0; height: parent.height }
+    GlassPanel {
+        id: fullBar
+        anchors.fill: parent
+        visible: bar.fullStyle
+        radius: 14
+        fill: Theme.glassBar
+        shadowStrength: 0.5
     }
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
@@ -70,13 +83,16 @@ PanelWindow {
         radius: 14
         fill: Theme.glassBar
         shadowStrength: 0.5
+        bare: bar.fullStyle
 
         RowLayout {
             id: leftRow
             anchors.centerIn: parent
             spacing: 10
 
-            GentooLogo { Layout.preferredWidth: 22; Layout.preferredHeight: 22; Layout.leftMargin: 4 }
+            GentooLogo { Layout.preferredWidth: 17; Layout.preferredHeight: 17; Layout.leftMargin: 4 
+                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: UiState.toggle("settings") }
+            }
 
             // workspaces
             Item {
@@ -142,7 +158,7 @@ PanelWindow {
                     if (m.button === Qt.MiddleButton) MediaService.toggle();
                     else UiState.toggle("media");
                 }
-                Visualizer { Layout.preferredWidth: 24; Layout.preferredHeight: 14; bars: 5; gap: 2 }
+                Visualizer { visible: Settings.visualizerEnabled; Layout.preferredWidth: 24; Layout.preferredHeight: 14; bars: 5; gap: 2 }
                 Text {
                     Layout.maximumWidth: 230
                     text: MediaService.artist !== "" ? MediaService.title + "  ·  " + MediaService.artist : MediaService.title
@@ -155,7 +171,7 @@ PanelWindow {
 
             // active window title
             Text {
-                visible: ToplevelManager.activeToplevel !== null && (!MediaService.hasPlayer || bar.width > 1800)
+                visible: Settings.showWindowTitle && ToplevelManager.activeToplevel !== null && (!MediaService.hasPlayer || bar.width > 1800)
                 Layout.maximumWidth: 260
                 text: ToplevelManager.activeToplevel ? ToplevelManager.activeToplevel.title : ""
                 color: Theme.textMute
@@ -175,6 +191,7 @@ PanelWindow {
         radius: 14
         fill: Theme.glassBar
         shadowStrength: 0.5
+        bare: bar.fullStyle
 
         BarButton {
             id: centerBtn
@@ -222,6 +239,7 @@ PanelWindow {
         radius: 14
         fill: Theme.glassBar
         shadowStrength: 0.5
+        bare: bar.fullStyle
 
         RowLayout {
             id: rightRow

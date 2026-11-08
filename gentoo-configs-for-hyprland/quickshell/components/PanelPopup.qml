@@ -13,10 +13,11 @@ PanelWindow {
     property int panelHeight: 300
     property string align: "right"      // right | left | center
     property bool keyboard: false
+    property bool enabledWhen: true
     property int topMargin: Theme.barMargin + Theme.barHeight + 8 - Theme.shadowPad
     default property alias content: glass.content
 
-    readonly property bool open: UiState.active === name
+    readonly property bool open: UiState.active === name && enabledWhen
 
     screen: UiState.screen
     visible: open || glass.opacity > 0.01
@@ -38,7 +39,7 @@ PanelWindow {
 
     WlrLayershell.namespace: "qsglass-" + win.name
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: win.open && win.keyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: win.open && win.keyboard ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: Region { item: glass }
 

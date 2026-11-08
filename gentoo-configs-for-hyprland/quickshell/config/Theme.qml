@@ -2,53 +2,54 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Visual system. Palette is sampled from the dusk-seascape wallpaper:
-// ink-navy shoreline, slate-indigo cloud banks, lavender-white highlights.
+// Visual system. Everything here follows Settings live, so colours/sizes/fonts can be changed from the
+// settings panel without touching code. Defaults are sampled from the dusk-seascape wallpaper.
 Singleton {
-    // base surfaces
-    readonly property color bg0: "#090a12"
-    readonly property color bg1: "#10111d"
-    readonly property color bg2: "#171930"
-    readonly property color surface: "#1e2140"
-    readonly property color surfaceHi: "#2a2e56"
-    readonly property color line: "#3a4070"
+    // base surfaces (derived from one background tint)
+    readonly property color base: Settings.color("base")
+    readonly property color bg0: Qt.darker(base, 1.7)
+    readonly property color bg1: base
+    readonly property color bg2: Qt.lighter(base, 1.25)
+    readonly property color surface: Qt.lighter(base, 1.7)
+    readonly property color surfaceHi: Qt.lighter(base, 2.2)
+    readonly property color line: Qt.lighter(base, 3.0)
 
     // text
-    readonly property color text: "#e0e4ff"
-    readonly property color textDim: "#a3a9d6"
-    readonly property color textMute: "#6c7299"
+    readonly property color text: Settings.color("text")
+    readonly property color textDim: Settings.color("textDim")
+    readonly property color textMute: Settings.color("textMute")
 
     // accents
-    readonly property color accent: "#a5b0ff"    // periwinkle (cloud highlight)
-    readonly property color accent2: "#86c8ff"   // cool cyan (sea glint)
-    readonly property color violet: "#b89cff"
-    readonly property color good: "#8fe3c0"
-    readonly property color warn: "#ffd6a0"
-    readonly property color bad: "#ff8fa6"
+    readonly property color accent: Settings.color("accent")
+    readonly property color accent2: Settings.color("accent2")
+    readonly property color violet: Settings.color("violet")
+    readonly property color good: Settings.color("good")
+    readonly property color warn: Settings.color("warn")
+    readonly property color bad: Settings.color("bad")
 
     // glass
-    readonly property color glass: Qt.rgba(0.05, 0.055, 0.11, 0.62)
-    readonly property color glassBar: Qt.rgba(0.05, 0.055, 0.11, 0.42)
-    readonly property color hairline: Qt.rgba(0.75, 0.8, 1.0, 0.10)
-    readonly property color tile: Qt.rgba(0.7, 0.75, 1.0, 0.06)
-    readonly property color tileHover: Qt.rgba(0.7, 0.75, 1.0, 0.12)
+    readonly property color glass: Qt.rgba(base.r, base.g, base.b, Settings.panelOpacity)
+    readonly property color glassBar: Qt.rgba(base.r, base.g, base.b, Settings.barOpacity)
+    readonly property color hairline: Qt.rgba(text.r, text.g, text.b, 0.10)
+    readonly property color tile: Qt.rgba(text.r, text.g, text.b, 0.06)
+    readonly property color tileHover: Qt.rgba(text.r, text.g, text.b, 0.12)
 
     // metrics
-    readonly property int radius: 16
-    readonly property int radiusSm: 10
-    readonly property int barHeight: 38
-    readonly property int barMargin: 10
+    readonly property int radius: Settings.radius
+    readonly property int radiusSm: Math.max(4, Math.round(Settings.radius * 0.625))
+    readonly property int barHeight: Settings.barHeight
+    readonly property int barMargin: Settings.barMargin
     readonly property int pad: 16
     readonly property int shadowPad: 8
 
     // motion
-    readonly property int animFast: 120
-    readonly property int animMed: 220
-    readonly property int animSlow: 380
+    readonly property int animFast: Math.round(120 * Settings.animSpeed)
+    readonly property int animMed: Math.round(220 * Settings.animSpeed)
+    readonly property int animSlow: Math.round(380 * Settings.animSpeed)
 
     // type
-    readonly property string fontSans: "Inter"
-    readonly property string fontMono: "JetBrains Mono"
+    readonly property string fontSans: Settings.fontSans
+    readonly property string fontMono: Settings.fontMono
     readonly property string fontIcon: "Material Symbols Rounded"
 
     function alpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a); }

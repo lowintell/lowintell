@@ -10,6 +10,7 @@ PanelPopup {
     id: win
 
     name: "media"
+    enabledWhen: Settings.mediaStyle === "classic"
     align: "left"
     panelWidth: 430
     panelHeight: col.implicitHeight + Theme.pad * 2

@@ -45,15 +45,12 @@ local menu = "rofi -show drun"
 -- Or execute your favorite apps at launch like this:
 --
 hl.on("hyprland.start", function()
-	--  hl.exec_cmd(terminal)
-	--hl.exec_cmd("nm-applet")
-	hl.exec_cmd("swaybg -i /home/lowintel/Pictures/wallpapers/wallhaven-x63gdd.png -m fill")
+	hl.exec_cmd("awww-daemon &")
 	hl.exec_cmd("discord")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
 	hl.exec_cmd("hypridle &")
 	hl.exec_cmd("qs &")
-	--hl.exec_cmd("dunst &")
 	hl.exec_cmd("gentoo-pipewire-launcher")
 end)
 
@@ -370,14 +367,8 @@ hl.window_rule({
 	no_focus = true,
 })
 
-hl.layer_rule({
-	match = { namespace = "rofi" },
-	blur = true,
-
-	match = { namespace = "notifications" },
-	blur = true,
-	ignore_alpha = 0.3,
-})
+hl.layer_rule({ match = { namespace = "rofi" }, blur = true })
+hl.layer_rule({ match = { namespace = "notifications" }, blur = true, ignore_alpha = 0.3 })
 
 hl.window_rule({
 	name = "Nautylus",

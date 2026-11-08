@@ -11,11 +11,12 @@ Item {
     property color fill: Theme.glass
     property color borderColor: Theme.hairline
     property real shadowStrength: 1
+    property bool bare: false          // draw no background (content only)
     default property alias content: inner.data
 
     // soft shadow (rings outside the body only)
     Repeater {
-        model: Theme.shadowPad
+        model: root.bare ? 0 : Theme.shadowPad
         Rectangle {
             required property int index
             x: -(index + 1)
@@ -31,6 +32,7 @@ Item {
 
     Rectangle {
         id: body
+        visible: !root.bare
         anchors.fill: parent
         radius: root.radius
         color: root.fill

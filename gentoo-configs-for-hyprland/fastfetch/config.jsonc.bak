@@ -1,0 +1,46 @@
+// ~/.config/fastfetch/config.jsonc
+// "Grey Tide" theme — desaturated blue-violet dusk over water
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+
+  "logo": {
+    "type": "file",
+    "source": "~/.config/fastfetch/ascii-logo.txt",
+    "color": { "1": "#8089b3", "2": "#5f7a8a" },
+    "padding": { "top": 1, "right": 3 }
+  },
+
+  "display": {
+    "separator": " ",
+    "color": { "keys": "#9aa0c2", "title": "#8089b3" },
+    "key": { "width": 3, "type": "icon" },
+    "size": { "binaryPrefix": "iec", "ndigits": 1 },
+    "percent": {
+      "type": ["bar", "num-color"],
+      "color": { "green": "#5f6e5f", "yellow": "#8a7a5a", "red": "#7a5a66" }
+    }
+  },
+
+  "modules": [
+    { "type": "title", "color": { "user": "#c7c9d9", "at": "#363a4f", "host": "#8089b3" } },
+    { "type": "separator", "string": "─", "color": "#5a638a" },
+
+    { "type": "os", "key": " OS" },
+    { "type": "kernel", "key": " Kernel" },
+    { "type": "uptime", "key": " Uptime" },
+    { "type": "shell", "key": " Shell" },
+    { "type": "wm", "key": " WM" },
+    { "type": "terminal", "key": " Terminal" },
+
+    { "type": "break" },
+
+    { "type": "cpu", "key": " CPU" },
+    { "type": "gpu", "key": " GPU" },
+    { "type": "memory", "key": "󰍛 Memory" },
+    { "type": "disk", "key": " Disk" },
+
+    { "type": "break" },
+
+    { "type": "colors", "symbol": "circle", "paddingLeft": 2 }
+  ]
+}

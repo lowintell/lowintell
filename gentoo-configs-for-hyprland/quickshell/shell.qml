@@ -15,9 +15,11 @@ ShellRoot {
     Scrim {}
 
     MusicPlayer {}
+    MusicPlayerCircle {}
     Weather {}
     SystemMonitor {}
     QuickSettings {}
     NotificationCenter {}
+    SettingsPanel {}
     NotificationPopups {}
 }
